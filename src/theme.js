@@ -10,6 +10,7 @@ const poppins = Poppins({
 });
 
 const theme = createTheme({
+    spacing: 8,
     typography: {
         fontFamily: poppins.style.fontFamily,
     },

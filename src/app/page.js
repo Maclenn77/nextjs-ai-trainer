@@ -3,6 +3,7 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import QuestionCard from "@/components/question_card";
 import useSWR from "swr";
+import { Typography } from "@mui/material";
 
 export default function Home() {
 
@@ -16,7 +17,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h1>Databricks Trainer</h1>
+      <Typography variant="h1">Databricks Trainer</Typography>
       <QuestionCard data={data} />
     </main>
   );
