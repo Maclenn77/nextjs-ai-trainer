@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
+import { payloadBuilder as payload} from '@/helpers/payload_builder';
 import axios from 'axios';
 import { Card, CardActions, CardContent, Button, Typography, TextareaAutosize, ButtonGroup, CircularProgress } from '@mui/material';
 import { Box } from '@mui/system';
 
-const anthropic_url = 'https://api.anthropic.com/v1/messages';
+const call_to_action = 'Send your answer';
 
 const circle_index = (current_index, value, length) => {
-    console.log(length)
     let next_index = current_index + parseInt(value);
     if (current_index + parseInt(value) < 0 ) {
         next_index = length - 1;
@@ -24,7 +24,8 @@ const QuestionCard = ({ data }) => {
     const [section, setSection] = useState(data[0]);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [answer, setAnswer] = useState('');
-    const [response, setResponse] = useState('Send your answer to see the response.');
+    const [response, setResponse] = useState(call_to_action);
+    const [previousAnswer, setPreviousAnswer] = useState('')
 
     const handleInputChange = (event) => {
         setAnswer(event.target.value);
@@ -41,36 +42,26 @@ const QuestionCard = ({ data }) => {
         let next_index = circle_index(questionIndex, value, section.questions.length);
 
         setQuestionIndex(next_index);
+        setResponse(call_to_action);
     }
 
 
     const handleSubmit = (section, question, answer) => {
-        const payload = {
-            model: "claude-3-opus-20240229",
-            max_tokens: 2000,
-            messages: [
-                {
-                    role: "user",
-                    content: `Evaluate my knowledge of Databricks in ${section}.`
-                },
-                {
-                    role: "assistant",
-                    content: question
-                },
-                {
-                    role: "user",
-                    content: answer
-                }
-            ]
-        }
 
         if (answer === '') {
             setResponse("Please provide an answer before submitting.")
             return
         }
 
-        const api_response = axios.post('/api/anthropic', payload).then((res) => setResponse(res.data))
+        
 
+        const request_body = payload(section, question, answer);
+        console.log(request_body);
+
+        axios.post('/api/anthropic', request_body).then((res) => setResponse(res.data))
+
+        setPreviousAnswer(answer);
+        setAnswer('');
         setResponse("Processing your response...")
     }
 
@@ -87,18 +78,23 @@ const QuestionCard = ({ data }) => {
             </CardActions>
             <Typography variant='p' component='div' sx={{p: 2}}>{section.questions[questionIndex]}</Typography>
             <Box sx={{minWidth: 350, p: 2}}>
-            <TextareaAutosize onChange={handleInputChange} style={{width: '80vw', height: '20vh', p: 1}} placeholder='Write your answer'/>
-            <Button sx={{width: '80vh', alignContent: 'center'}} type="submit" onClick={() => handleSubmit(section.section, section.questions[questionIndex], answer)}>Submit</Button>
+            <TextareaAutosize onChange={handleInputChange} value={answer} style={{width: '80vw', height: '20vh', p: 1}} placeholder='Write your answer'/>
+            <ButtonGroup>
+              <Button sx={{width: '40vh'}} type="submit" onClick={() => handleSubmit(section.section, section.questions[questionIndex], answer)}>Answer</Button>
+              <Button sx={{width: '40vh'}} type="submit" onClick={() => handleSubmit(section.section, section.questions[questionIndex], `Don't know about ${section.questions[questionIndex]}, please explain to me.`)}>Don't know</Button>
+            </ButtonGroup>
+            
             </Box>
-            { response === 'Processing your response...' && <CircularProgress /> }
-            { response !== 'Processing your response...' &&  <Typography variant='p' component='div' sx={{p: 6, lineHeight: 2, whiteSpace: 'pre-wrap'}}>{response}</Typography> }
+            <Box sx={{p: 2}}>
+                {previousAnswer !== '' && <Typography variant='p' component='div' sx={{whiteSpace: 'pre-wrap'}}>Previous answer: {previousAnswer}</Typography>}
+                { response === 'Processing your response...' && <CircularProgress /> }
+                {response !== 'Processing your response...' &&  <Typography variant='p' component='div' sx={{p: 6, lineHeight: 2, whiteSpace: 'pre-wrap'}}>{response}</Typography>}
+            </Box>
             <CardActions>
                 <Button value={-1} type="submit" onClick={(e) => handleChangeQuestion(e.target.value)}>Previous Question</Button>
                 <Button value={1} type="submit" onClick={(e) => handleChangeQuestion(e.target.value)}>Next Question</Button>
             </CardActions>
             </CardContent>
-                    
-
         </Card>
 
     );

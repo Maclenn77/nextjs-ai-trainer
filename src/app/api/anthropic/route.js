@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
@@ -16,7 +16,7 @@ export async function POST(req, res) {
     const payload = await req.json()
 
     const response = await sendRequest(payload)
-
+    console.log("response received")
     return NextResponse.json(response['content'][0]['text'])
 
 
