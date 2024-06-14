@@ -24,9 +24,9 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 Copy .env.exampe to .env and add your anthropic api key
 
-´´´bash
-# cp .env.example .env
-´´´
+```bash
+cp .env.example .env
+```
 
 
 ## Learn More
