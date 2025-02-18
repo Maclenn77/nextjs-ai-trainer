@@ -22,7 +22,7 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Set Up
 
-Copy .env.exampe to .env and add your anthropic api key
+Copy .env.exampe to .env and add your [anthropic api key](https://www.anthropic.com/api)
 
 ```bash
 cp .env.example .env
